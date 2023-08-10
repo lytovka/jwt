@@ -22,4 +22,14 @@ object Encoding {
     val payload = b46(p)
     return "$header.$payload."
   }
+
+  /**
+   * Decodes JWT string to header and payload.
+   */
+  fun decode(jwt: String): Pair<String, String> {
+    val parts = jwt.split(".")
+    val header = String(Base64.getDecoder().decode(parts[0]))
+    val payload = String(Base64.getDecoder().decode(parts[1]))
+    return Pair(header, payload)
+  }
 }

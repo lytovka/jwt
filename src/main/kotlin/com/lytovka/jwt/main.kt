@@ -3,6 +3,7 @@ package com.lytovka.jwt
 import com.lytovka.jwt.model.Header
 import com.lytovka.jwt.model.Payload
 import com.lytovka.jwt.utils.Encoding
+import io.jsonwebtoken.Jwts
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -14,10 +15,11 @@ fun main() {
     role = "admin"
   )
 
+
   val serializedHeader = Json.encodeToString(Header.serializer(), header)
   val serializedPayload = Json.encodeToString(Payload.serializer(), payload)
 
-  val result = Encoding.encode(serializedHeader, serializedPayload)
+  val resultEncoded = Encoding.encode(serializedHeader, serializedPayload)
+  val resultDecoded = Encoding.decode(resultEncoded)
 
-  println(result)
 }

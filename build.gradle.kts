@@ -17,12 +17,16 @@ java.setSourceCompatibility(javaVersion)
 // kotlin
 val kotlinSerializationVersion = "1.5.1"
 
+// security
+val jjwtVersion = "0.11.2"
+
 repositories {
     mavenCentral()
 }
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerializationVersion}")
+    implementation("io.jsonwebtoken:jjwt-api:${jjwtVersion}")
 }
 
 tasks.withType<KotlinCompile> {
