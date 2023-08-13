@@ -6,5 +6,5 @@ import kotlinx.serialization.Serializable
 data class Header(
     val alg: String,
     val typ: String? = null,
-    val kid: String? = null
+    val kid: String? = null,
 )

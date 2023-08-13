@@ -5,6 +5,7 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
+    id("com.diffplug.spotless") version "6.20.0"
 }
 
 group = "com.lytovka"
@@ -35,5 +36,19 @@ tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
         jvmTarget = javaVersion
+    }
+}
+
+spotless {
+    java {
+        removeUnusedImports()
+    }
+    kotlin {
+        target("**/*.kt")
+        ktlint()
+    }
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        ktlint()
     }
 }
