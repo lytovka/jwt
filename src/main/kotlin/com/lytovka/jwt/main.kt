@@ -2,9 +2,24 @@ package com.lytovka.jwt
 
 import com.lytovka.jwt.model.Header
 import com.lytovka.jwt.model.Payload
-import com.lytovka.jwt.utils.Encoding
-import io.jsonwebtoken.Jwts
+import com.lytovka.jwt.utils.Base64
+import com.lytovka.jwt.utils.HashBasedMessageAuthenticationCode
 import kotlinx.serialization.json.Json
+
+// Validate JWT
+fun validateJWT(jwt: String, secret: String): Boolean {
+  val parts = jwt.split(".")
+  if (parts.size != 3) return false
+
+  val header = parts[0]
+  val payload = parts[1]
+  val providedSignature = Base64.urlDecode(parts[2])
+
+  val data = "$header.$payload"
+  val computedSignature = HashBasedMessageAuthenticationCode.computeHmac(data, secret)
+
+  return computedSignature.contentEquals(providedSignature)
+}
 
 fun main() {
   val header = Header(
@@ -15,11 +30,17 @@ fun main() {
     role = "admin"
   )
 
+  val serializedHeader = Json.encodeToString(Header.serializer(), header).encodeToByteArray()
+  val serializedPayload = Json.encodeToString(Payload.serializer(), payload).encodeToByteArray()
 
-  val serializedHeader = Json.encodeToString(Header.serializer(), header)
-  val serializedPayload = Json.encodeToString(Payload.serializer(), payload)
+  val encodedHeader = Base64.urlEncode(serializedHeader)
+  val encodedPayload = Base64.urlEncode(serializedPayload)
+  val unprotectedJwt = "$encodedHeader.$encodedPayload"
 
-  val resultEncoded = Encoding.encode(serializedHeader, serializedPayload)
-  val resultDecoded = Encoding.decode(resultEncoded)
-
+  val secret = "my-secret-key"
+  val signature = Base64.urlEncode(HashBasedMessageAuthenticationCode.computeHmac(unprotectedJwt, secret))
+  val jwt = "$unprotectedJwt.$signature"
+  println(jwt)
+  val isValid = validateJWT(jwt, "$secret+")
+  println(isValid)
 }
