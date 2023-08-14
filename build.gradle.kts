@@ -19,7 +19,7 @@ java.setSourceCompatibility(javaVersion)
 val kotlinSerializationVersion = "1.5.1"
 
 // security
-val jjwtVersion = "0.11.5"
+val joseVersion = "9.31"
 
 repositories {
     mavenCentral()
@@ -27,9 +27,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
-    implementation("io.jsonwebtoken:jjwt-api:$jjwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-impl:$jjwtVersion")
-    runtimeOnly("io.jsonwebtoken:jjwt-jackson:$jjwtVersion")
+    implementation("com.nimbusds:nimbus-jose-jwt:$joseVersion")
 }
 
 tasks.withType<KotlinCompile> {
