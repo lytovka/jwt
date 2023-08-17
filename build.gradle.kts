@@ -5,6 +5,9 @@ plugins {
     kotlin("jvm") version kotlinVersion
     kotlin("kapt") version kotlinVersion
     kotlin("plugin.serialization") version kotlinVersion
+    kotlin("plugin.spring") version kotlinVersion
+    id("org.springframework.boot") version "3.1.2"
+    id("io.spring.dependency-management") version "1.1.2"
     id("com.diffplug.spotless") version "6.20.0"
 }
 
@@ -17,6 +20,7 @@ java.setSourceCompatibility(javaVersion)
 
 // kotlin
 val kotlinSerializationVersion = "1.5.1"
+val kotlinCoroutinesVersion = "1.7.3"
 
 // security
 val joseVersion = "9.31"
@@ -26,7 +30,14 @@ repositories {
 }
 
 dependencies {
+    // Kotlin
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:$kotlinCoroutinesVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
+
+    // Spring
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
+    // JWT
     implementation("com.nimbusds:nimbus-jose-jwt:$joseVersion")
 }
 
