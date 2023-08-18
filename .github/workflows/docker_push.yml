@@ -5,9 +5,16 @@ on: workflow_dispatch
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.event.deployment.environment }}
+      cancel-in-progress: true
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
+
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
 
       - name: Set up JDK 17
         uses: actions/setup-java@v3
@@ -26,11 +33,9 @@ jobs:
           aws-region: us-east-1
 
       - name: Login to Amazon ECR
-        id: login-ecr-public
         uses: aws-actions/amazon-ecr-login@v1
 
       - name: Build, tag, and push image to Amazon ECR
-        id: build-image
         shell: bash
         env:
           CONTAINER_BUILD_NAME: jwt-service
@@ -38,9 +43,6 @@ jobs:
           ECR_REPOSITORY: jwt-service-sandbox
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          echo "ECR_REGISTRY=$ECR_REGISTRY"
-          echo "ECR_REPOSITORY=$ECR_REPOSITORY"
-          echo "IMAGE_TAG=$IMAGE_TAG"
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
