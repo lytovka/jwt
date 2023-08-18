@@ -41,6 +41,17 @@ dependencies {
     implementation("com.nimbusds:nimbus-jose-jwt:$joseVersion")
 }
 
+tasks.bootBuildImage {
+    environment.set(
+        mapOf(
+            "BP_JVM_VERSION" to "17",
+            "BP_SPRING_CLOUD_BINDINGS_DISABLED" to "true",
+            "BPL_SPRING_CLOUD_BINDINGS_DISABLED" to "true",
+            "BPE_JAVA_TOOL_OPTIONS" to "-XX:ActiveProcessorCount=0 -XX:+UseContainerSupport -XX:+PreferContainerQuotaForCPUCount"
+        )
+    )
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
