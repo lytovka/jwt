@@ -37,6 +37,8 @@ jobs:
 
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v1
+        with:
+          mask-password: true
 
       - name: Build, tag, and push image to Amazon ECR
         shell: bash
@@ -47,6 +49,5 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
+          echo "image=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"
