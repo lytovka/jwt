@@ -37,7 +37,7 @@ jobs:
         shell: bash
         env:
           CONTAINER_BUILD_NAME: jwt-service
-          ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          ECR_REGISTRY: public.ecr.aws
           ECR_REPOSITORY: jwt-service-sandbox
           IMAGE_TAG: ${{ github.sha }}
         run: |
