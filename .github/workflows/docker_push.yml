@@ -40,15 +40,23 @@ jobs:
         with:
           mask-password: true
 
+      - name: Get current artifact version
+        id: current-artifact-version
+        shell: bash
+        run: |
+          echo "current_artifact_version=$(${{ github.workspace }}/gradlew -q currentVersion)" >> $GITHUB_OUTPUT
+
       - name: Build, tag, and push image to Amazon ECR
         shell: bash
         env:
-          CONTAINER_BUILD_NAME: jwt-service
+          CONTAINER_BUILD_NAME: jwt-service:${{ steps.current-artifact-version.outputs.current_artifact_version }}
           ECR_REGISTRY_DOMAIN: public.ecr.aws
           ECR_REGISTRY_ALIAS: n0n6f0e7
           ECR_REPOSITORY: jwt-service-sandbox
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY_DOMAIN/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:$IMAGE_TAG
+          docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY_DOMAIN/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY_DOMAIN/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY_DOMAIN/$ECR_REGISTRY_ALIAS/$ECR_REPOSITORY:latest
           echo "image=${{ env.ECR_REGISTRY_DOMAIN }}/${{ env.ECR_REGISTRY_ALIAS }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}"

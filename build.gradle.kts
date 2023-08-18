@@ -52,6 +52,11 @@ tasks.bootBuildImage {
     )
 }
 
+// ---- Current Version ----
+tasks.register("currentVersion") {
+    logger.quiet("$version")
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions {
         freeCompilerArgs = listOf("-Xjsr305=strict")
