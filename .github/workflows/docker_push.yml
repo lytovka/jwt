@@ -38,6 +38,9 @@ jobs:
           ECR_REPOSITORY: jwt-service-sandbox
           IMAGE_TAG: ${{ github.sha }}
         run: |
+          echo "ECR_REGISTRY=$ECR_REGISTRY"
+          echo "ECR_REPOSITORY=$ECR_REPOSITORY"
+          echo "IMAGE_TAG=$IMAGE_TAG"
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker tag $CONTAINER_BUILD_NAME $ECR_REGISTRY/$ECR_REPOSITORY:latest
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
