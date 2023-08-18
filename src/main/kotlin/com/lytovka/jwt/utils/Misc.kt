@@ -1,10 +1,7 @@
-package com.lytovka.jwt
+package com.lytovka.jwt.utils
 
 import com.lytovka.jwt.model.Header
 import com.lytovka.jwt.model.Payload
-import com.lytovka.jwt.utils.Base64
-import com.lytovka.jwt.utils.KeyGenerator
-import com.lytovka.jwt.utils.SignatureBuilder
 import com.nimbusds.jose.JWSAlgorithm
 import com.nimbusds.jose.JWSVerifier
 import com.nimbusds.jose.crypto.RSASSAVerifier
@@ -14,6 +11,7 @@ import com.nimbusds.jose.jwk.RSAKey
 import com.nimbusds.jwt.SignedJWT
 import kotlinx.serialization.json.Json
 import java.lang.IllegalArgumentException
+import java.security.MessageDigest
 import java.security.interfaces.RSAPublicKey
 
 fun generateJWKStringFromPublicKey(kid: String, rsaPublicKey: RSAPublicKey): JWKSet {
@@ -33,7 +31,7 @@ fun verifyJWT(token: String, jwkSet: JWKSet): Boolean {
     return jwt.verify(verifier)
 }
 
-fun main() {
+fun Misc() {
     val kid = "my-key-id"
     val headerRsa = Header(
         alg = JWSAlgorithm.RS256.name,
@@ -56,4 +54,17 @@ fun main() {
     println(jwks.getKeyByKeyId(kid))
     val isVerified = verifyJWT(jwtRsa, jwks)
     println(isVerified)
+}
+
+class SecureHashAlgorithm {
+    companion object {
+        fun sha256(input: String): String {
+            val bytes = MessageDigest.getInstance("SHA-256").digest(input.toByteArray())
+            return bytes.joinToString("") { "%02x".format(it) }
+        }
+        fun sha512(input: String): String {
+            val bytes = MessageDigest.getInstance("SHA-512").digest(input.toByteArray())
+            return bytes.joinToString("") { "%02x".format(it) }
+        }
+    }
 }
