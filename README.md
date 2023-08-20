@@ -1,6 +1,6 @@
-# JWT
+# JWT Service
 
-Generate JWT for me daddy
+Generate a signed JWT for me daddy
 
 ### Specs
 - JWT: https://datatracker.ietf.org/doc/html/rfc7519
