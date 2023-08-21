@@ -3,11 +3,9 @@ package com.lytovka.jwt.service
 import com.lytovka.jwt.configuration.RequestContext
 import com.lytovka.jwt.dto.JwtTokenResponse
 import com.lytovka.jwt.model.Header
+import com.lytovka.jwt.model.JwtTokenBuilder
 import com.lytovka.jwt.model.Payload
-import com.lytovka.jwt.utils.Base64
-import com.lytovka.jwt.utils.SignatureBuilder
 import com.nimbusds.jose.JWSAlgorithm
-import kotlinx.serialization.json.Json
 import org.springframework.stereotype.Service
 import java.util.Date
 import java.util.UUID
@@ -17,18 +15,18 @@ class JwtService(private val requestContext: RequestContext, private val keyServ
     private val kid = "my-key-id"
 
     fun createJwt(): JwtTokenResponse {
+        val keyPair = keyService.loadKeyPair()
+
         val header = buildHeader()
         val payload = buildPayload()
-        val serializedHeader = Json.encodeToString(Header.serializer(), header)
-        val serializedPayload = Json.encodeToString(Payload.serializer(), payload)
-        val encodedHeaderRsa = Base64.urlEncode(serializedHeader.encodeToByteArray())
-        val encodedPayloadRsa = Base64.urlEncode(serializedPayload.encodeToByteArray())
 
-        val unprotectedJwtRsa = "$encodedHeaderRsa.$encodedPayloadRsa"
-        val keyPair = keyService.loadKeyPair()
-        val encodedSignature = Base64.urlEncode(SignatureBuilder.computeWithRSA(unprotectedJwtRsa, keyPair.private))
+        val jwtToken = JwtTokenBuilder()
+            .setHeader(header)
+            .setPayload(payload)
+            .signWith(keyPair.private)
+            .build()
 
-        return JwtTokenResponse(accessToken = "$unprotectedJwtRsa.$encodedSignature", expiresIn = 3600)
+        return JwtTokenResponse(accessToken = jwtToken.toString(), expiresIn = payload.getExpiresIn())
     }
 
     private fun buildHeader(): Header {
@@ -36,7 +34,6 @@ class JwtService(private val requestContext: RequestContext, private val keyServ
             alg = JWSAlgorithm.RS256.name,
             kid = kid,
             typ = "JWT",
-//            jku = "${getIssuerUrl()}.well-known/jwks.json",
         )
     }
 
@@ -54,6 +51,9 @@ class JwtService(private val requestContext: RequestContext, private val keyServ
         )
     }
 
+    /**
+     * This method is tied to using `ngrok` locally. The issuer URL should be statically defined if the application is deployed.
+     */
     private fun getIssuerUrl(): String {
         val headers = requestContext.httpHeaders ?: throw IllegalStateException("Http headers are not set")
         val scheme = headers.getFirst("X-Forwarded-Proto") ?: "http"
