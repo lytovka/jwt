@@ -14,6 +14,7 @@ class JwtRouter {
         "/jwt".nest {
             POST("/create", jwtHandler::createJwt)
             GET("/create", jwtHandler::helloWorld)
+            POST("/validate", jwtHandler::validateJwt)
         }
     }
 

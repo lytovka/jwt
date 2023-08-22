@@ -2,11 +2,15 @@ package com.lytovka.jwt.service
 
 import com.lytovka.jwt.configuration.RequestContext
 import com.lytovka.jwt.dto.JwtTokenResponse
+import com.lytovka.jwt.dto.JwtValidationResponse
 import com.lytovka.jwt.model.Header
 import com.lytovka.jwt.model.JwtTokenBuilder
 import com.lytovka.jwt.model.Payload
+import com.lytovka.jwt.utils.Base64
+import com.lytovka.jwt.utils.Signature
 import com.nimbusds.jose.JWSAlgorithm
 import org.springframework.stereotype.Service
+import java.security.interfaces.RSAPublicKey
 import java.util.Date
 import java.util.UUID
 
@@ -27,6 +31,14 @@ class JwtService(private val requestContext: RequestContext, private val keyServ
             .build()
 
         return JwtTokenResponse(accessToken = jwtToken.toString(), expiresIn = payload.getExpiresIn())
+    }
+
+    fun validateJwt(): JwtValidationResponse {
+        val keyPair = keyService.loadKeyPair()
+        val jwtToken = requestContext.httpHeaders?.getFirst("Authorization") ?: throw IllegalStateException("Authorization header is not set")
+        val jwt = JwtTokenBuilder().parse(jwtToken).build()
+        val isValid = Signature.Verifier.verifyRSA(jwt.getUnprotectedToken(), Base64.urlDecode(jwt.signature!!), keyPair.public as RSAPublicKey)
+        return JwtValidationResponse(isValid = isValid)
     }
 
     private fun buildHeader(): Header {
