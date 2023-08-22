@@ -1,14 +1,20 @@
 package com.lytovka.jwt.model
 
 import com.lytovka.jwt.utils.Base64
-import com.lytovka.jwt.utils.SignatureBuilder
+import com.lytovka.jwt.utils.Signature
 import java.security.PrivateKey
 
 data class JwtToken(
-    val header: String? = null,
-    val payload: String? = null,
-    val signature: String? = null,
+    var header: String? = null,
+    var payload: String? = null,
+    var signature: String? = null,
 ) {
+    fun getUnprotectedToken(): String {
+        val h = header ?: throw IllegalStateException("Header is not set")
+        val p = payload ?: throw IllegalStateException("Payload is not set")
+        return "$h.$p"
+    }
+
     override fun toString(): String {
         val h = header ?: throw IllegalStateException("Header is not set")
         val p = payload ?: throw IllegalStateException("Payload is not set")
@@ -38,8 +44,33 @@ class JwtTokenBuilder {
         if (hasSignature) {
             throw IllegalStateException("Signature already set")
         }
-        signature = Base64.encode(SignatureBuilder.computeWithRSA(getUnprotectedToken(), key))
+        signature = Base64.urlEncode(Signature.Builder.computeWithRSA(getUnprotectedToken(), key))
         hasSignature = true
+        return this
+    }
+
+    fun parse(headerValue: String): JwtTokenBuilder {
+        if (!headerValue.startsWith("Bearer ")) {
+            throw IllegalArgumentException("Invalid authorization header format")
+        }
+        val headerParts = headerValue.split("Bearer ")
+        if (headerParts.size < 2) {
+            throw IllegalArgumentException("Invalid authorization header format")
+        }
+
+        val token = headerParts[1]
+        val parts = token.split(".")
+
+        if (parts.size != 2 && parts.size != 3) {
+            throw IllegalArgumentException("Invalid number of token parts. Expected 2 or 3, but found ${parts.size}")
+        }
+
+        header = parts[0]
+        payload = parts[1]
+
+        if (parts.size == 3) {
+            signature = parts[2]
+        }
         return this
     }
 
