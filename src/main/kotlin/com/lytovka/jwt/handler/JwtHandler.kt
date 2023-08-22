@@ -13,7 +13,12 @@ class JwtHandler(private val jwtService: JwtService) {
     }
 
     suspend fun createJwt(request: ServerRequest): ServerResponse {
-        val jwt = jwtService.createJwt()
-        return ServerResponse.ok().bodyValueAndAwait(jwt)
+        val response = jwtService.createJwt()
+        return ServerResponse.ok().bodyValueAndAwait(response)
+    }
+
+    suspend fun validateJwt(request: ServerRequest): ServerResponse {
+        val response = jwtService.validateJwt()
+        return ServerResponse.ok().bodyValueAndAwait(response)
     }
 }

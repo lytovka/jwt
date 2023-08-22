@@ -2,7 +2,7 @@ package com.lytovka.jwt.utils
 
 import java.util.Base64
 
-class Base64 {
+class B64 {
 
     companion object {
         /**
